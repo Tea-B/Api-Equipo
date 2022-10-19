@@ -1,0 +1,16 @@
+const express = require('express');
+const router = express.Router();
+
+const {getAllSports, getSportById, postNewSports, putSports, deleteSports } = require('../controller/sports.controllers');
+
+
+
+router.get('/',getAllSports);
+router.get('/:id/', getSportById)
+router.post('/', postNewSports);
+router.put('/', putSports );
+router.delete('/', deleteSports );
+
+
+
+module.exports = router;

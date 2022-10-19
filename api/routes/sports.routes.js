@@ -8,7 +8,7 @@ const {getAllSports, getSportById, postNewSports, putSports, deleteSports } = re
 router.get('/',getAllSports);
 router.get('/:id/', getSportById)
 router.post('/', postNewSports);
-router.put('/', putSports );
+router.put('/:id', putSports );
 router.delete('/', deleteSports );
 
 

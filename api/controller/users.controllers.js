@@ -1,4 +1,7 @@
-const Users = require('../modelos/users.models'); 
+const Users = require('../modelos/users.models');
+const bcrypt = require('bcrypt');
+const { validationPassword, validationEmail } = require('../validators/validation');
+const { generateSign } = require('../jwt/jwt');
 
 const getAllUsers = async (req,res) => {
     try {
@@ -19,14 +22,46 @@ const getUsers = async (req,res) => {
     }
 };
 
-const postNewUsers = async (req, res) => {
+const register = async (req, res) => {
     try {
         const { name, edad, email, password, deporte } = req.body
         const newUsers = new Users({ name, edad, email, password, deporte });
-        const createdUsers = await newUsers.save();
-        return res.status(201).json(createdUsers);
+        if(!validationEmail(req.body.email)){
+            console.log({code: 403, message: "Invalid email"})
+            res.status(403).send({code: 403, message: "Invalid email"});
+        }
+        if(!validationPassword(req.body.password)){
+            console.log({code: 403, message: "Invalid password"})
+            res.status(403).send({code: 403, message: "Invalid password"})
+        }
+        newUsers.password = bcrypt.hashSync(newUsers.password, 10);
+        const createdUser = await newUsers.save();
+        return res.status(201).json(createdUser);
     } catch (error) {
-        return res.status(500).json(error)
+        return res.status(500).json(error) ;
+    }
+};
+
+const login = async (req, res) => {
+    try {
+        console.log(req.headers.authorization)
+        const userInfo = await Users.findOne({email: req.body.email});
+        if (bcrypt.compareSync(req.body.password, userInfo.password)){          
+            const token = generateSign(userInfo._id, userInfo.email);
+            return res.status(200).json(token);
+        } else {
+            return res.status(400).json({message: "Invalid password"});
+        }
+    } catch (error) {
+        return res.status(500).json(error) ;
+    }
+};
+
+const logout = (req, res) => {
+    try {
+        return res.status(200).json({token: null})
+    } catch (error) {
+        return res.status(500).json(error);
     }
 };
 
@@ -58,4 +93,4 @@ const deleteUsers = async (req,res) => {
     }
 };
 
-module.exports = {getAllUsers, getUsers, postNewUsers, putUsers, deleteUsers};
+module.exports = {getAllUsers, getUsers, register, login, logout, putUsers, deleteUsers};

@@ -1,10 +1,13 @@
 const express = require('express');
 const {connect} = require('./utils/database');
+const dotenv = require('dotenv');
 
 const sportsRouter = require('./api/routes/sports.routes');
 const usersRouter = require('./api/routes/users.routes');
 
 const PORT = 8000;
+
+dotenv.config();
 const app = express();
 connect();
 
